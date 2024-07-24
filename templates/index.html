@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        @font-face {
+            font-family: 'crazyivan';
+            src: url('fonts/crazyivan.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'moonhouse';
+            src: url('fonts/moonhouse.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Roy Make Round';
+            src: url('fonts/Roy Make Round .ttf') format('truetype');
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: url('static/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+
+        .top-left-text {
+            position: absolute;
+            top: 3vh;
+            left: 3vh;
+            font-family: 'crazyivan', sans-serif;
+            text-align: left;
+            line-height: 0.8;
+        }
+
+        .line1 {
+            font-size: 3vw;
+            /* Responsive font size */
+            /* Adjust size for the first line */
+            color: black;
+            /* Adjust color for the first line */
+        }
+
+        .line2 {
+            font-size: 2.5vw;
+            /* Responsive font size */
+            /* Adjust size for the second line */
+            color: rgb(203, 154, 102);
+            /* Adjust color for the second line */
+        }
+
+        .line3 {
+            font-size: 3vw;
+            /* Responsive font size */
+            color: black;
+            /* Adjust color for the third line */
+        }
+
+        .input-group-container {
+            position: relative;
+            width: 80vw;
+            display: flex;
+            justify-content: center;
+            /* 水平居中 */
+            margin-top: 7vh;
+            margin-left: -12vw;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #word {
+            width: 50vw;
+            /* Use percentage for responsive width */
+            height: 4vh;
+            padding-left: 5vw;
+            font-size: 2.2vw;
+            /* Use relative font size */
+            border: 0.3vw solid #000000;
+            border-radius: 5vw;
+            font-family: 'moonhouse';
+            /* Use the Moonhouse font */
+        }
+
+        .word {
+            transition: background-color 1s ease;
+            font-family: 'crazyivan';
+            /* 使用自定义字体 */
+            font-size: 3.2vw;
+            /* 设置字体大小 */
+            color: rgb(0, 0, 0);
+            /* 设置字体颜色 */
+            position: absolute;
+            /* Make sure words are positioned absolutely */
+
+        }
+
+        .select-icon {
+            position: absolute;
+            left: 2.3vw;
+            cursor: pointer;
+            width: 2.3vw;
+            height: 2vw;
+        }
+
+        #num-words {
+            position: absolute;
+            left: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .select-icon:hover+#num-words,
+        #num-words:focus {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 2vw;
+            cursor: pointer;
+            width: 3.2vw;
+            height: 2.3vw;
+        }
+
+        .delete-icon {
+            position: absolute;
+            right: -4vw;
+            /* Adjust this value as needed */
+            cursor: pointer;
+            width: 3vw;
+            height: 3vw;
+        }
+
+        .result-icon {
+            position: absolute;
+            top: 2vw;
+            right: 2vw;
+            /* 50px from the right */
+            cursor: pointer;
+            width: 5vw;
+            height: 5vw;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+            backdrop-filter: blur(10px);
+            /* Background blur effect */
+        }
+
+        .modal-content {
+            background-color: rgba(0, 0, 0, 0.4);
+            margin: 10% auto;
+            padding: 1vw;
+            border: 1px solid #888;
+            width: 50vw;
+            height: 30vh;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            border-radius: 10px;
+        }
+
+        #result-score {
+            font-size: 4vw;
+            /* Larger font size for the score */
+            font-family: 'moonhouse', sans-serif;
+            /* Different font for the score */
+            color: #ffffff;
+            /* Color for the score text */
+            margin-bottom: 1vw;
+            /* Spacing between score and message */
+        }
+
+        #result-message {
+            font-size: 1vw;
+            /* Smaller font size for the message */
+            font-family: 'moonhouse', sans-serif;
+            /* Different font for the message */
+            color: #ffffff;
+            /* Color for the message text */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 4vw;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .word.selected {
+            font-weight: bold;
+            /* Make the text bold */
+        }
+
+        .word::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 8px;
+            background: black;
+            transition: width 0.3s;
+        }
+
+        .word:hover::after {
+            width: 100%;
+            /* Full width on hover */
+        }
+
+        .revocation-icon {
+            position: absolute;
+            right: -8.5vw;
+            /* Adjust this value as needed */
+            cursor: pointer;
+            width: 3.2vw;
+            height: 3.2vw;
+        }
+
+        .refresh-icon {
+            position: absolute;
+            right: -13vw;
+            /* Adjust this value as needed */
+            cursor: pointer;
+            width: 3.2vw;
+            height: 3.2vw;
+        }
+
+        .rectangle {
+            position: absolute;
+            top: calc(42%);
+            /* Adjust the top position based on the screen height */
+            left: 6.25%;
+            /* Center align the rectangle (100% - 87.5%) / 2 */
+            width: 87.5%;
+            /* 7/8 of the screen width */
+            height: 3vh;
+            background-color: rgb(255, 246, 239);
+            box-shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.7);
+            /* Add shadow with Gaussian blur */
+            border-radius: 10px;
+            /* Add rounded corners */
+        }
+
+        .rectangle-bottom {
+            position: absolute;
+            bottom: 30px;
+            /* Position 30px from the bottom */
+            left: 6.25%;
+            /* Center align the rectangle (100% - 87.5%) / 2 */
+            width: 87.5%;
+            /* 7/8 of the screen width */
+            height: 3vh;
+            background-color: rgb(255, 246, 239);
+            box-shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.7);
+            /* Add shadow with Gaussian blur */
+            border-radius: 10px;
+            /* Add rounded corners */
+        }
+
+        .history-container {
+            position: absolute;
+            top: 12vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .turn-left,
+        .turn-right {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+
+        .history-word {
+            width: 70%;
+            height: 50px;
+            /* Adjust height as needed */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            /* Adjust font color */
+            font-family: 'crazyivan', sans-serif;
+            /* Set desired font */
+        }
+
+        .persistent-underline::after {
+            width: 100% !important;
+        }
+
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        input,
+        select {
+            width: calc(20% - 22px);
+            height: calc(80% - 22px);
+        }
+
+        button {
+            background-color: #f0ad4e;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ec971f;
+        }
+
+        #brainstorm-container {
+            margin-top: 3vh;
+            padding: 2vh;
+            border-radius: 10px;
+            width: 50vw;
+            height: 25vh;
+            position: relative;
+        }
+
+
+        #brainstorm-words .word {
+            display: inline-block;
+            padding: 1vh;
+            margin: 1vh;
+            border-radius: 5px;
+            cursor: move;
+            position: absolute;
+        }
+
+        .delete-btn {
+            display: none;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 2vh;
+            height: 2vh;
+            text-align: center;
+            line-height: 2vh;
+            font-size: 1.4vh;
+            cursor: pointer;
+        }
+
+        .word:hover .delete-btn {
+            display: inline-block;
+        }
+
+        .wiggle {
+            animation: wiggle 0.3s infinite;
+        }
+
+        @keyframes wiggle {
+
+            0%,
+            100% {
+                transform: rotate(-3deg);
+            }
+
+            50% {
+                transform: rotate(3deg);
+            }
+        }
+
+        .dashed-line {
+            position: absolute;
+            border-top: 1px dashed #fff;
+            z-index: 10;
+        }
+
+        @keyframes disappear {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes appear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+
+            }
+
+            50% {
+                transform: scale(0.5);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(0.4);
+
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .disappear {
+            animation: disappear 0.5s forwards;
+        }
+
+        .appear {
+            animation: appear 1s ease-in-out;
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="static/result-icon.png" class="result-icon" id="result-icon" alt="Result">
+
+    <!-- Modal structure -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="result-score"></p>
+            <p id="result-message"></p>
+        </div>
+    </div>
+
+    <div class="top-left-text">
+        <span class="line1">511-creative</span><br>
+        <span class="line2">design</span><br>
+        <span class="line3">workshop</span>
+    </div>
+
+    <div class="container">
+
+        <div class="history-container">
+            <button class="turn-left">
+                <img src="static/turnleft-icon.png" alt="Left">
+            </button>
+            <div class="history-word"></div>
+            <button class="turn-right">
+                <img src="static/turnright-icon.png" alt="Right">
+            </button>
+        </div>
+
+        <form id="word-form">
+            <div class="input-group-container">
+                <div class="input-group">
+                    <input type="text" id="word" name="word" placeholder="Enter a word" required>
+                    <img src="static/select-icon.png" class="select-icon" id="select-icon">
+                    <select id="num-words" name="num-words" required>
+                        <option value="1">1 word</option>
+                        <option value="2">2 words</option>
+                        <option value="3">3 words</option>
+                    </select>
+                    <img src="static/search-icon.png" class="search-icon" id="search-icon">
+                    <img src="static/delete-icon.png" class="delete-icon" id="delete-icon">
+                    <img src="static/revocation-icon.png" class="revocation-icon" id="revocation-icon">
+                    <img src="static/refresh-icon.png" class="refresh-icon" id="refresh-icon">
+
+
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="rectangle"></div>
+    <div id="brainstorm-container">
+        <div id="brainstorm-words"></div>
+    </div>
+    <div class="rectangle-bottom"></div> <!-- 第二矩形框 -->
+
+    <script>
+        let generationCount = 0;
+        let prevWords = new Set();
+        let usedCombinations = new Set();
+        let draggedWord = null;
+        let selectedWord = null;
+        let actionStack = [];
+        let historyWords = [];
+        let currentHistoryIndex = 0;
+
+        document.getElementById('word-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            generateWords();
+        });
+
+        function generateWords() {
+            playSound('static/write_sound.wav');
+            generationCount++;
+            var word = document.getElementById('word').value;
+            var numWords = document.getElementById('num-words').value;
+
+            if (!historyWords.includes(word)) {
+                historyWords.push(word);
+                updateHistoryDisplay();
+            }
+
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'word=' + encodeURIComponent(word) + '&num-words=' + encodeURIComponent(numWords) + '&prev-words=' + encodeURIComponent(Array.from(prevWords).join(','))
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var wordsContainer = document.getElementById('brainstorm-words');
+                    let newElements = [];
+
+                    data.words.forEach(word => {
+                        prevWords.add(word);
+                        var wordSpan = document.createElement('span');
+                        wordSpan.textContent = word;
+                        wordSpan.classList.add('word');
+                        wordSpan.draggable = true;
+
+                        // Ensure no overlap
+                        let position = getNonOverlappingPosition(wordSpan);
+                        wordSpan.style.left = position.left;
+                        wordSpan.style.top = position.top;
+
+                        wordSpan.addEventListener('dragstart', handleDragStart);
+                        wordSpan.addEventListener('dragover', handleDragOver);
+                        wordSpan.addEventListener('drop', handleDropBrainstorm);
+                        wordSpan.addEventListener('dragend', handleDragEnd);
+                        wordSpan.addEventListener('click', handleWordClick);
+                        wordsContainer.appendChild(wordSpan);
+                        newElements.push(wordSpan);
+                    });
+
+                    actionStack.push({
+                        action: 'generate',
+                        elements: newElements,
+                        positions: newElements.map(el => ({ left: el.style.left, top: el.style.top }))
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function getNonOverlappingPosition(element) {
+            const container = document.getElementById('brainstorm-words');
+            const maxAttempts = 100;
+            let attempts = 0;
+
+            while (attempts < maxAttempts) {
+                attempts++;
+                const left = Math.random() * 80; // Adjust range for left position
+                const top = Math.random() * 80;  // Adjust range for top position
+                element.style.left = `${left}%`;
+                element.style.top = `${top}%`;
+
+                let overlapping = false;
+                const elements = container.querySelectorAll('.word');
+                for (let i = 0; i < elements.length; i++) {
+                    if (isOverlapping(element, elements[i])) {
+                        overlapping = true;
+                        break;
+                    }
+                }
+
+                if (!overlapping) {
+                    return { left: `${left}%`, top: `${top}%` };
+                }
+            }
+
+            // If no non-overlapping position is found, place randomly
+            return { left: `${Math.random() * 80}%`, top: `${Math.random() * 80}%` };
+        }
+
+        function isOverlapping(el1, el2) {
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+
+            return !(rect1.right < rect2.left ||
+                rect1.left > rect2.right ||
+                rect1.bottom < rect2.top ||
+                rect1.top > rect2.bottom);
+        }
+
+
+        // 更新历史记录显示
+        function updateHistoryDisplay() {
+            const historyWordDiv = document.querySelector('.history-word');
+            historyWordDiv.innerHTML = ''; // Clear existing content
+            const word = historyWords[currentHistoryIndex] || '';
+
+            // Create spans for each letter to apply random rotation and font size
+            for (let letter of word) {
+                const span = document.createElement('span');
+                span.textContent = letter;
+                span.style.display = 'inline-block';
+                span.style.transform = `rotate(${Math.random() * 90 - 30}deg)`; // Random angle between -45 and 45 degrees
+                span.style.fontSize = `${Math.random() * 20 + 220}px`; // Random font size between 180px and 200px
+                span.style.margin = '0 12px'; // Add some space between letters
+                historyWordDiv.appendChild(span);
+            }
+        }
+
+
+        // 向左滑动按钮点击处理
+        document.querySelector('.turn-left').addEventListener('click', function () {
+            if (currentHistoryIndex > 0) {
+                currentHistoryIndex--;
+                updateHistoryDisplay();
+            }
+        });
+
+        // 向右滑动按钮点击处理
+        document.querySelector('.turn-right').addEventListener('click', function () {
+            if (currentHistoryIndex < historyWords.length - 1) {
+                currentHistoryIndex++;
+                updateHistoryDisplay();
+            }
+        });
+        function handleDragStart(event) {
+            draggedWord = event.target;
+            event.dataTransfer.setData('text/plain', draggedWord.textContent);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            if (event.target.classList.contains('word') && event.target !== draggedWord) {
+                showDashedLine(draggedWord, event.target);
+            }
+        }
+        function addGenerateToActionStack() {
+            const newElements = Array.from(document.querySelectorAll('#brainstorm-words .word'))
+                .slice(-generationCount); // 获取新生成的词语
+
+            actionStack.push({
+                action: 'generate',
+                elements: newElements,
+                positions: newElements.map(el => ({ left: el.style.left, top: el.style.top }))
+            });
+        }
+
+        // Function to play a sound
+        function playSound(url) {
+            const audio = new Audio(url);
+            audio.play();
+        }
+
+        function handleDropBrainstorm(event) {
+            event.preventDefault();
+            const targetWord = event.target;
+            if (draggedWord && draggedWord !== targetWord) {
+                const combinationKey = draggedWord.textContent + ':' + targetWord.textContent;
+                if (usedCombinations.has(combinationKey)) {
+                    alert('这个组合已经被使用过了。');
+                    return;
+                }
+                // Store the original positions
+                const originalPosition1 = { left: draggedWord.style.left, top: draggedWord.style.top };
+                const originalPosition2 = { left: targetWord.style.left, top: targetWord.style.top };
+
+                fetch('/combine', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'word1=' + encodeURIComponent(draggedWord.textContent) + '&word2=' + encodeURIComponent(targetWord.textContent)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!prevWords.has(data.word) && data.word !== draggedWord.textContent && data.word !== targetWord.textContent) {
+                            const originalLeft1 = draggedWord.style.left;
+                            const originalTop1 = draggedWord.style.top;
+                            const originalLeft2 = targetWord.style.left;
+                            const originalTop2 = targetWord.style.top;
+
+                            draggedWord.classList.add('disappear');
+                            targetWord.classList.add('disappear');
+
+                            setTimeout(() => {
+                                draggedWord.remove();
+                                targetWord.textContent = data.word;
+                                targetWord.classList.remove('disappear');
+                                targetWord.classList.add('appear');
+                                setTimeout(() => {
+                                    targetWord.classList.remove('appear');
+                                    targetWord.classList.add('shake');
+                                    setTimeout(() => targetWord.classList.remove('shake'), 500);
+                                }, 1000);
+                            }, 500);
+
+                            usedCombinations.add(combinationKey);
+                            prevWords.add(data.word);
+
+                            // Push the action to the stack
+                            actionStack.push({
+                                action: 'combine',
+                                element: targetWord,
+                                originalWord1: draggedWord.textContent,
+                                originalWord2: targetWord.textContent,
+                                originalPosition1: originalPosition1,
+                                originalPosition2: originalPosition2
+                            });
+
+                            usedCombinations.add(combinationKey);
+                            prevWords.add(data.word);
+                            removeDashedLine();
+                            playSound('static/write_sound.wav');
+                        } else {
+                            alert('生成的词语与初始词语或之前的词语相同，请重新尝试。');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function handleDragEnd(event) {
+            const rect = document.getElementById('brainstorm-container').getBoundingClientRect();
+            const left = event.clientX - rect.left - draggedWord.offsetWidth / 2;
+            const top = event.clientY - rect.top - draggedWord.offsetHeight / 2;
+            draggedWord.style.left = `${left}px`;
+            draggedWord.style.top = `${top}px`;
+            removeDashedLine();
+        }
+
+        function showDashedLine(element1, element2) {
+            removeDashedLine();
+            const rect1 = element1.getBoundingClientRect();
+            const rect2 = element2.getBoundingClientRect();
+            const line = document.createElement('div');
+            line.classList.add('dashed-line');
+            const x1 = rect1.left + rect1.width / 2;
+            const y1 = rect1.top + rect1.height / 2;
+            const x2 = rect2.left + rect2.width / 2;
+            const y2 = rect2.top + rect2.height / 2;
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            line.style.width = `${length}px`;
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
+            document.body.appendChild(line);
+        }
+
+        function removeDashedLine() {
+            const line = document.querySelector('.dashed-line');
+            if (line) {
+                line.remove();
+            }
+        }
+
+        document.getElementById('select-icon').addEventListener('click', function () {
+            const selectMenu = document.getElementById('num-words');
+            selectMenu.focus();
+        });
+
+        document.getElementById('search-icon').addEventListener('click', function () {
+            generateWords();
+            addGenerateToActionStack();
+        });
+
+
+        document.getElementById('delete-icon').addEventListener('click', function () {
+            if (selectedWord) {
+                selectedWord.remove();
+                selectedWord = null;
+            }
+        });
+
+        function handleWordClick(event) {
+            if (selectedWord) {
+                selectedWord.classList.remove('selected');
+            }
+            selectedWord = event.target;
+            selectedWord.classList.add('selected');
+        }
+
+        document.getElementById('brainstorm-container').addEventListener('mouseover', function () {
+            const words = document.querySelectorAll('#brainstorm-words .word');
+            words.forEach(word => word.classList.add('wiggle'));
+        });
+
+        document.getElementById('brainstorm-container').addEventListener('mouseout', function () {
+            const words = document.querySelectorAll('#brainstorm-words .word');
+            words.forEach(word => word.classList.remove('wiggle'));
+        });
+
+        document.getElementById('revocation-icon').addEventListener('click', function () {
+            if (actionStack.length > 0) {
+                let lastAction = actionStack.pop();
+
+                if (lastAction.action === 'generate') {
+                    lastAction.elements.forEach(element => element.remove());
+                } else if (lastAction.action === 'combine') {
+                    const element = lastAction.element;
+                    const originalWord1 = lastAction.originalWord1;
+                    const originalWord2 = lastAction.originalWord2;
+                    const originalPosition1 = lastAction.originalPosition1;
+                    const originalPosition2 = lastAction.originalPosition2;
+
+                    // Restore the original words
+                    element.remove(); // Remove the combined word
+
+                    const wordSpan1 = document.createElement('span');
+                    wordSpan1.textContent = originalWord1;
+                    wordSpan1.classList.add('word');
+                    wordSpan1.draggable = true;
+                    wordSpan1.style.left = originalPosition1.left;
+                    wordSpan1.style.top = originalPosition1.top;
+                    wordSpan1.addEventListener('dragstart', handleDragStart);
+                    wordSpan1.addEventListener('dragover', handleDragOver);
+                    wordSpan1.addEventListener('drop', handleDropBrainstorm);
+                    wordSpan1.addEventListener('dragend', handleDragEnd);
+                    wordSpan1.addEventListener('click', handleWordClick);
+                    document.getElementById('brainstorm-words').appendChild(wordSpan1);
+
+                    const wordSpan2 = document.createElement('span');
+                    wordSpan2.textContent = originalWord2;
+                    wordSpan2.classList.add('word');
+                    wordSpan2.draggable = true;
+                    wordSpan2.style.left = originalPosition2.left;
+                    wordSpan2.style.top = originalPosition2.top;
+                    wordSpan2.addEventListener('dragstart', handleDragStart);
+                    wordSpan2.addEventListener('dragover', handleDragOver);
+                    wordSpan2.addEventListener('drop', handleDropBrainstorm);
+                    wordSpan2.addEventListener('dragend', handleDragEnd);
+                    wordSpan2.addEventListener('click', handleWordClick);
+                    document.getElementById('brainstorm-words').appendChild(wordSpan2);
+                }
+            }
+        });
+
+        document.getElementById('refresh-icon').addEventListener('click', function () {
+            const wordsContainer = document.getElementById('brainstorm-words');
+            wordsContainer.innerHTML = '';  // Remove all words
+            prevWords.clear();  // Clear the set of previous words
+            usedCombinations.clear();  // Clear the set of used combinations
+            actionStack = [];  // Clear the action stack
+        });
+        document.getElementById('brainstorm-container').addEventListener('dblclick', function (event) {
+            if (event.target.classList.contains('word')) {
+                event.target.classList.toggle('persistent-underline');
+            }
+        });
+
+        document.getElementById('brainstorm-container').addEventListener('click', function (event) {
+            if (event.target.classList.contains('word') && event.target.classList.contains('persistent-underline')) {
+                event.target.classList.remove('persistent-underline');
+            }
+        });
+        document.getElementById('result-icon').addEventListener('click', function () {
+            const selectedWords = document.querySelectorAll('.persistent-underline');
+            if (selectedWords.length >= 2) {
+                const randomScore = Math.floor(Math.random() * 31) + 70; // Generates a number between 70 and 100
+                let message = '';
+
+                if (randomScore > 90) {
+                    message = 'Your idea this time is very novel, focusing on more different aspects of things, and then you can go to research or practice to see whether it meets the practical needs.';
+                } else if (randomScore > 80) {
+                    message = 'Your idea this time is relatively novel, you can continue to explore and improve the novelty again or to research or practice to see if it meets the practical needs.';
+                } else {
+                    message = 'Your idea is not novel enough this time, you can continue to explore to discover more interesting things or ideas.';
+                }
+
+                document.getElementById('result-score').textContent = `Score: ${randomScore}`;
+                document.getElementById('result-message').textContent = message;
+
+                // Display the modal
+                document.getElementById('result-modal').style.display = "block";
+            } else {
+                alert('Please select at least two words by double-clicking to get a result.');
+            }
+        });
+
+        // Get the modal
+        var modal = document.getElementById('result-modal');
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName('close')[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+    </script>
